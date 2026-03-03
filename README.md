@@ -1,9 +1,9 @@
-# Swiss Army Knife  Custom 74mm Scales
+# Swiss Army Knife Custom 74mm Scales
 
 This is a collection of OpenSCAD scripts for modifying and stretching Swiss Army Knife (SAK) scales to fit the 74mm models. I've been looking for a 74mm pen scale for a while. There was a version I never got the chance to download that took generic pen refills, but that has been lost since Shapeways went bankrupt.
 
-![74mm Blue Pen Scale](74mm_blue_pen_scale.jpg)
-![74mm Red Dual Slot Scale](74mm_red_dual_slot_scale.jpg)
+![74mm Blue Pen Scale](74mm_blue_pen_scale.png)
+![74mm Red Dual Slot Scale](74mm_red_dual_slot_scale.png)
 
 ---
 
