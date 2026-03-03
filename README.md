@@ -1,11 +1,14 @@
-# Victorinox Custom Scale Toolkit (74mm Executive)
+# Swiss Army Knife 74mm Custom Scales
 
-This is a collection of OpenSCAD scripts for modifying and stretching Victorinox scales to fit the 74mm Executive frame. I built these to bridge the gap between 58mm designs and functional 74mm EDC components without losing the original ergonomic feel.
+This is a collection of OpenSCAD scripts for modifying and stretching Swiss Army Knife  scales to fit the 74mm Executive frame. I built these to bridge the gap between 58mm designs and functional 74mm EDC components without losing the original ergonomic feel.
 
+![74mm Blue Pen Scale](74mm_blue_pen_scale.jpg)
+
+![74mm Red Dual Slot Scale](74mm_red_dual_slot_scale.jpg)
 ---
 
 ### 📜 Credits & Sources
-The base 58mm geometries are derived from **Emil’s SAK Scales** on Thingiverse:
+The base 58mm geometries are derived from **igor_b’s SAK Scales** on Thingiverse:
 [Thing 5216489 - Victorinox 58mm Scales](https://www.thingiverse.com/thing:5216489/files)
 
 ---
