@@ -2,9 +2,9 @@
 
 This is a collection of OpenSCAD scripts for modifying and stretching Swiss Army Knife  scales to fit the 74mm Executive frame. I built these to bridge the gap between 58mm designs and functional 74mm EDC components without losing the original ergonomic feel.
 
-![74mm Blue Pen Scale](74mm_blue_pen_scale.jpg)
+![74mm Blue Pen Scale](74mm_blue_pen_scale.png)
 
-![74mm Red Dual Slot Scale](74mm_red_dual_slot_scale.jpg)
+![74mm Red Dual Slot Scale](74mm_red_dual_slot_scale.png)
 ---
 
 ### 📜 Credits & Sources
