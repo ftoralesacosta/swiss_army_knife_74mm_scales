@@ -1,5 +1,5 @@
 // --- File Setup ---
-file_58mm = "58mm_source_files/sak58mmscales-pen.stl";
+file_58mm = "sak58mmscales-pen.stl";
 file_74mm = "sak74mm_blank.stl";
 
 $fn = 60; // Smoothness
@@ -36,7 +36,7 @@ scale_center = (left_edge + right_edge) / 2;
 show_target_ghost = false; 
 show_cut_planes   = false; 
 show_debug_rivets = false;
-show_center_lines = true;
+show_center_lines = false;
 
 // --- Cylinder for Pen ---
 y_cyl_params = [0.0, 38, -0.5, 20]; 
@@ -85,7 +85,7 @@ difference() {
     #y_pen_hole_subtractions();
     
     // Step F: Shear bottom of scale for tighter pen action
-    translate([-100, -100, 0.95])  //1.25 levels with scale
+    translate([-100, -100, 0.95])  //1.25 level with scale
         cube([200, 200, 3]);
     
 }
