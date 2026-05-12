@@ -85,7 +85,7 @@ difference() {
     #y_pen_hole_subtractions();
     
     // Step F: Shear bottom of scale for tighter pen action
-    translate([-100, -100, 0.75])  //1.25 levels with scale
+    translate([-100, -100, 0.95])  //1.25 levels with scale
         cube([200, 200, 3]);
     
 }
