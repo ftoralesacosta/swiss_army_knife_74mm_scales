@@ -16,10 +16,11 @@ The base 58mm geometries are derived from **Emil’s SAK Scales** on Thingiverse
 
 ### Files and Organization
 * STL files are in the top directory, and can be downloaded easily
-    * Simple Dual Slot Scale
+    * BLANK Scale
+    * Dual Slot Scale
     * Pen Scale BASE
-    * Pen Scale with pin slots
-    * Pen Scale Pocket clip and pins
+    * Pen Scale PLUS pin slots
+    * Pen Scale PLUS Pocket clip and pins
 * OpensCAD
     * Source for generating STL files
     * Boolean edits for additional features and Pen Scale
