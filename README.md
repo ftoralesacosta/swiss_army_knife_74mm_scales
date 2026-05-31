@@ -17,7 +17,7 @@ The base 58mm geometries are derived from **Emil’s SAK Scales** on Thingiverse
 ### Files and Organization
 * STL files are in the top directory, and can be downloaded easily
     * Simple Dual Slot Scale
-    * Simple Pen Scale
+    * Pen Scale BASE
     * Pen Scale with pin slots
     * Pen Scale Pocket clip and pins
 * OpensCAD
@@ -71,7 +71,9 @@ Adds mounting points to an existing 74mm STL.
 
 ### 📝 ToDo's
 * ~~Apply Minkowski rounding to the dual slot scale instead of the current split/stretch method.~~
-* Utilize the side of the pen scale (e.g., a pull-out tray or side door of some kind).
+* Utilize the side of the pen scale if no pins
+    * pull-out tray?
+    * interesting idea of a recessed cavity under a tweezer in the pen scale
 * Figure out how to install the Leatherman micro bit driver.
 * Indent the mounting area so the pocket clip sits flush with the scale (pending scale thickness checks).
 * Fit another accessory slot for the pen scale that does not have a pocket clip.
