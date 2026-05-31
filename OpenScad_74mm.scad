@@ -1,39 +1,33 @@
-// --- File Setup ---
-filename = "58mm_source_files/victorinox-scale-58mm.stl";
-
-// --- Dimensions Configuration (Scale) ---
-original_len   = 58;
-original_width = 18;  
-original_thick = 3.2; 
-
+// --- File Setup & Core Dimensions ---
 target_len     = 75;
-target_width   = 21;
+target_width   = 17.0; // Carefully dialed-in width for 74mm scale
 target_thick   = 2.5;
-
-plug_thickness = 1.8;
 $fn = 60; // Global smoothness
 
-// --- Dimensions Configuration (Slots - Borrowed) ---
+// --- Minkowski Configuration ---
+mask_offset_x = 0; // Perfectly centered
+mask_offset_y = 0; // Perfectly centered
+mask_edge_radius = 2.1;
 
-// 1. Channel Dimensions (Tweezers/Toothpick)
-enable_accessory_channels=true;
+// --- Accessory Channels (Tweezers/Toothpick Slots) ---
+enable_accessory_channels = true;
 channel_width = 3.15; 
 channel_length = 46; 
 channel_height = 1.3; 
 
-// 2. Position (ADJUST THESE TO MOVE THE SLOT)
-channel_pos_x = -3.2;          
+// Position relative to flat bottom face at Z = 0
+channel_pos_x = -3.2;         
 channel_pos_y = 8.6;          
 channel_angle = 185.0;        
-channel_pos_z = 1.31; 
+channel_pos_z = channel_height / 2; // Starts exactly at Z = 0
 
-// 3. Notch Settings (The opening for the tool head)
+// Notch Settings (The opening for the tool head)
 notch_length = 4.5;           
 notch_start_pos = 42;
-notch_depth_offset = -2.25;    
+notch_depth_offset = 2.25;    
 notch_height = 6.0;
 
-// 4. Pin Channel Settings
+// --- Pin Channel Settings (Optional) ---
 enable_pin_slot = false;
 pin_width = 1.0; 
 pin_length = 45.0;        
@@ -42,62 +36,57 @@ pin_pos_y = 14.5;
 pin_pos_z = 1.0;
 pin_angle = 186.0; 
 
-// --- Calculations ---
-stretch  = target_len - original_len;
-offset   = stretch / 2;
-scale_y  = target_width / original_width;
-scale_z  = target_thick / original_thick;
-
 // --- New Rivet Holes ---
 hole_dist_y   = 60.5 / 2; 
 hole_dist_x   = 9.5 / 2; 
 hole_dia      = 3.8;
-hole_height   = 1.6; 
-hole_z_offset = 2.0-1.5; 
+hole_height   = 2.1; // Height 1.6 + 0.5 clearance
+hole_z_offset = -0.5; // Starts below Z = 0 for a clean cut
+hole_nudge_x  = 0; // Perfectly centered
+hole_nudge_y  = 0; // Perfectly centered
+
+// --- Debug Config ---
+show_center_lines = false;
 
 
-// --- Geometry Modules ---
+// --- Mathematical Geometry Modules ---
 
-module oriented_knife_geom() {
-    rotate([0, 0, -90]) import(filename, convexity=3);
+module sak_profile_2d() {
+    rad = 7.5; elong = 0.9;
+    hull() {
+        for (x = [-1, 1], y = [-1, 1]) 
+            translate([x * (target_width/2 - rad) + mask_offset_x, y * (target_len/2 - (rad * elong)) + mask_offset_y])
+            scale([1, elong]) circle(r=rad);
+    }
 }
 
-module rivet_plugs() {
-    translate([-4.2, 31.2, 0.15]) cylinder(h=plug_thickness, d=4.5);
-    translate([4.0, 31.2, 0.15])  cylinder(h=plug_thickness, d=4.8);
-    translate([-4.2, -31.2, 0.15]) cylinder(h=plug_thickness, d=4.5);
-    translate([4.0, -31.2, 0.15])  cylinder(h=plug_thickness, d=4.8);
+module sak_scale_rounded(thickness=5, edge_radius=1.5) {
+    minkowski() {
+        // Core shape (shrunken so the sphere doesn't make it oversized)
+        linear_extrude(height = thickness - 2*edge_radius, center=true)
+            offset(r = -edge_radius)
+            sak_profile_2d();
+            
+        // The sphere that adds the curve to Top AND Bottom
+        sphere(r = edge_radius);
+    }
 }
 
-module stretched_body() {
-    rotate([0, 0, 90]) 
-    scale([1, scale_y, scale_z]) 
-    union() {
-        // Right Half
-        translate([offset, 0, 0]) 
-            intersection() {
-                oriented_knife_geom();
-                translate([0, -50, -50]) cube([100, 100, 100]); 
-            }
-        // Left Half
-        translate([-offset, 0, 0]) 
-            intersection() {
-                oriented_knife_geom();
-                translate([-100, -50, -50]) cube([100, 100, 100]); 
-            }
-        // Center Fill Bridge
-        hull() {
-            translate([offset, 0, 0]) 
-                intersection() {
-                    oriented_knife_geom();
-                    translate([0, -50, -50]) cube([0.1, 100, 100]);
-                }
-            translate([-offset, 0, 0]) 
-                intersection() {
-                    oriented_knife_geom();
-                    translate([-0.1, -50, -50]) cube([0.1, 100, 100]); 
-                }
-        }
+module sak_74mm_solid_body() {
+    difference() {
+        // 1. Generate double-thickness rounded scale centered at Z = 0
+        sak_scale_rounded(thickness = target_thick * 2, edge_radius = mask_edge_radius);
+        
+        // 2. Cut off the bottom half to leave a perfectly flat bottom face at Z = 0
+        translate([-100, -100, -200])
+            cube([200, 200, 200]);
+    }
+}
+
+module new_rivet_holes() {
+    for(x = [-1, 1], y = [-1, 1]) {
+        translate([x * hole_dist_x + hole_nudge_x, y * hole_dist_y + hole_nudge_y, hole_z_offset]) 
+            cylinder(h=hole_height, d=hole_dia, $fn=30);
     }
 }
 
@@ -123,18 +112,11 @@ module accessory_slots() {
         rotate([0, 0, pin_angle])
         translate([0, pin_length/2, 0])
         union() {
-            // Tension Curve Parameters
-            bend_amount = 0.4; // How much the middle bows out (in mm)
-            steps = 20;        // Smoothness of the curve
-            
+            bend_amount = 0.4;
+            steps = 20;
             for (i = [0 : steps]) {
-                // Calculate progress along the pin (from -0.5 to 0.5)
                 progress = (i / steps) - 0.5; 
-                
-                // Parabolic curve formula: y = 1 - 4x^2
-                // This makes the offset 0 at the ends and 'bend_amount' in the middle
                 offset = bend_amount * (1 - pow(progress * 2, 2));
-                
                 translate([offset, progress * pin_length, 0])
                 rotate([90, 0, 0])
                 cylinder(d = pin_width, h = pin_length/steps + 0.1, center=true, $fn=15);
@@ -143,33 +125,31 @@ module accessory_slots() {
     }
 }
 
-// --- Final Assembly ---
 
+// --- Final Assembly & Rendering ---
+
+// 1. Visual Verification Centerlines (Optional)
+if (show_center_lines) {
+    translate([0, 0, 3])
+        %color("Black") cube([0.1, 100, 0.5], center=true);
+    translate([0, 0, 3])
+        %color("Black") cube([100, 0.1, 0.5], center=true);
+}
+
+// 2. Final Subtracted Shape
 difference() {
-    // 1. Positive Volume
-    union() {
-        stretched_body();
-        rivet_plugs();
-    }
+    // Perfectly flat-bottomed, rounded-top mathematical solid body
+    sak_74mm_solid_body();
 
-    // 2. Negative Volume (Holes & Slots)
-    union() {
-        // Rivet Holes
-        for(x = [-1, 1], y = [-1, 1]) {
-            #translate([x * hole_dist_x, y * hole_dist_y, hole_z_offset]) 
-                cylinder(h=hole_height, d=hole_dia);
-        }
+    // Rivet Holes (cuts from Z = -0.5 to 1.6)
+    #new_rivet_holes();
 
-        // --- Accessory Slots ---
-        
-        
-        //Comment Both Slots out if you want a 'blank' scale
-        // Slot 1: The Original
+    // Accessory Slots (cuts from Z = 0 to 1.3)
+    if (enable_accessory_channels) {
         #accessory_slots();
-
-        // Slot 2: Reflected across the X-axis (Top to Bottom)
-        // Rotating 180 degrees keeps the angle parallel to the first
+        
+        // Reflected slot
         rotate([0, 0, 180])
-        #accessory_slots();
+            #accessory_slots();
     }
 }
