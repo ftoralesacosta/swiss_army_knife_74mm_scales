@@ -1,6 +1,7 @@
 # Swiss Army Knife Custom 74mm Scales
 
-This is a collection of OpenSCAD scripts for modifying and stretching Swiss Army Knife (SAK) scales to fit the 74mm models. I've been looking for a 74mm pen scale for a while. There was a version I never got the chance to download that took generic pen refills, but that has been lost since Shapeways went bankrupt. 
+This is a collection of OpenSCAD scripts for creating scales for 74mm Swiss Army Knife models. I've been looking for a 74mm pen scale for a while. There was a version I never got the chance to download that took generic pen refills, but that has been lost since Shapeways went bankrupt. Originally this repo filled and stretched a 58mm scale. It now defines a standalone 74mm scale geometry. The dual slot scale uses this by itself, buth the pen scale still relies on the internal 58mm geometry for the pen-insert.
+
 
 ![74mm Blue Pen Scale](74mm_blue_pen_scale.png)
 ![74mm Red Dual Slot Scale](74mm_red_dual_slot_scale.png)
@@ -13,6 +14,18 @@ The base 58mm geometries are derived from **Emil’s SAK Scales** on Thingiverse
 
 ---
 
+### Files and Organization
+* STL files are in the top directory, and can be downloaded easily
+    * Simple Dual Slot Scale
+    * Simple Pen Scale
+    * Pen Scale with pin slots
+    * Pen Scale Pocket clip and pins
+* OpensCAD
+    * Source for generating STL files
+    * Boolean edits for additional features and Pen Scale
+    * Please edit! Would love PRs!
+
+---
 ### 🛠️ Hardware Requirements
 These scripts are optimized for a flush, high-tension fit. Standard 3.0mm inserts are too long for this profile and will bottom out.
 
@@ -34,8 +47,8 @@ These scripts are optimized for a flush, high-tension fit. Standard 3.0mm insert
 
 ### 📦 Components
 
-#### 1. 58mm → 74mm: Dual Accessory Scale
-Converts a 58mm source into a 74mm scale with dual-tool support.
+#### 1. 74mm Dual Accessory Scale
+Defines a 74mm scale with dual-tool support.
 * **Twin Slots:** Mirrored internal geometry for both Toothpick and Tweezers.
 * **Geometry Preservation:** Uses `hull()` operations to stretch the length. This ensures the ergonomic curves of the 58mm tips remain intact rather than being linearly distorted.
 * **Rivet Management:** Automatically plugs old rivet holes and generates new 3.8mm mounting points for the 74mm frame.
@@ -57,8 +70,13 @@ Adds mounting points to an existing 74mm STL.
 ---
 
 ### 📝 ToDo's
-* Apply Minkowski rounding to the dual slot scale instead of the current split/stretch method.
+* ~~Apply Minkowski rounding to the dual slot scale instead of the current split/stretch method.~~
 * Utilize the side of the pen scale (e.g., a pull-out tray or side door of some kind).
 * Figure out how to install the Leatherman micro bit driver.
 * Indent the mounting area so the pocket clip sits flush with the scale (pending scale thickness checks).
 * Fit another accessory slot for the pen scale that does not have a pocket clip.
+
+### PR Requirements
+* Maintain modularity
+* Must be printed and tested, verified with link to picture of working feature
+
