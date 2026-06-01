@@ -35,7 +35,7 @@ clip_hole_spacing = 4.5;
 // Note: These coordinates are relative to the world, not the STL's local origin
 pos_x = scale_center+0.3;  
 pos_y = -7.2; 
-pos_z = 4.8;  // Entry point (Surface height)
+pos_z = 5.0;  // Z-height entry point. To make holes perfectly flush with the flat face, this should match the scale's translation Z (which is 4.0). Adjust this if you shift the scale.
 
 rot_x = 0;
 rot_y = 180;
