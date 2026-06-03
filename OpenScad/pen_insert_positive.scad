@@ -71,6 +71,14 @@ extraction_method = "hull_intersection"; // ["hull_intersection", "direct_differ
 fill_rivet_holes = true;
 
 
+// --- 7. NARROW CHANNEL EXTENSION ---
+// The final length of the narrow channel that houses the tip of the pen (in mm).
+// Originally, the STL's narrow channel had a length of 21.0mm (Y from 8 to 29).
+// We shorten the STL bounding box to 16.0mm (ending at Y=24), and manually
+// extend it with a perfectly aligned cylinder-on-box channel to this final length.
+pen_tip_length = 21.0;
+
+
 // ============================================================================
 // INTERNAL IMPLEMENTATION
 // ============================================================================
@@ -147,9 +155,9 @@ module capturing_volume() {
                 // A custom combination of narrow/wide boxes that isolates the pen cavity and 
                 // slider slot while keeping clear of the scale's curved borders.
                 union() {
-                    // Box 1: Most narrow channel for the pen tip (Y from 8 to 29)
-                    translate([0, 18.5, 0])
-                        cube([2.5, 21.0, box_size[2]], center=true);
+                    // Box 1: Most narrow channel for the pen tip (Y from 8 to 24)
+                    translate([0, 16.0, 0])
+                        cube([2.5, 16.0, box_size[2]], center=true);
 
                     // Box 2: Medium pen holder channel (Y from -25 to 8)
                     translate([0, -8.5, 0])
@@ -173,25 +181,47 @@ module capturing_volume() {
     }
 }
 
+// Helper module to create a channel of a given length, consisting of a cylinder of radius 1.25
+// (centered at X=0, Z=0) and a box of width 2.5 (from X=-1.25 to 1.25) extending from Z=0 to Z=1.25.
+module aligned_channel(length) {
+    union() {
+        // Cylinder along Y-axis, centered at X=0, Z=0
+        rotate([-90, 0, 0])
+            cylinder(r=1.25, h=length, $fn=60);
+        
+        // Box atop the cylinder (from Z=0 to Z=1.25)
+        translate([-1.25, 0, 0])
+            cube([2.5, length, 1.25]);
+    }
+}
+
 // The generated positive impression of the cavity
 module pen_cavity_impression() {
-    if (extraction_method == "hull_intersection") {
-        // Method A (Recommended):
-        // 1. Get all concave cavities by subtracting STL from its convex hull
-        // 2. Intersect with the capturing box to isolate ONLY the pen slot
-        intersection() {
+    union() {
+        if (extraction_method == "hull_intersection") {
+            // Method A (Recommended):
+            // 1. Get all concave cavities by subtracting STL from its convex hull
+            // 2. Intersect with the capturing box to isolate ONLY the pen slot
+            intersection() {
+                difference() {
+                    hull() oriented_stl();
+                    oriented_stl();
+                }
+                capturing_volume();
+            }
+        } else if (extraction_method == "direct_difference") {
+            // Method B:
+            // Subtract the STL directly from the capturing box.
             difference() {
-                hull() oriented_stl();
+                capturing_volume();
                 oriented_stl();
             }
-            capturing_volume();
         }
-    } else if (extraction_method == "direct_difference") {
-        // Method B:
-        // Subtract the STL directly from the capturing box.
-        difference() {
-            capturing_volume();
-            oriented_stl();
+        
+        // Add the manually extended aligned channel starting at Y = 24
+        if (pen_tip_length > 16.0) {
+            translate([0, 24.0, 0])
+                aligned_channel(pen_tip_length - 16.0);
         }
     }
 }
