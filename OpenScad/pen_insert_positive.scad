@@ -79,7 +79,7 @@ module aligned_channel(length) {
 }
 
 // Extracted positive cavity impression with the adjustable manual extension
-module pen_cavity_impression() {
+module pen_cavity_impression(tip_length = pen_tip_length) {
     union() {
         // Extract cavity by subtracting STL from its convex hull, limited to capturing volume
         intersection() {
@@ -91,9 +91,9 @@ module pen_cavity_impression() {
         }
         
         // Manual pen tip extension beyond Y = 24
-        if (pen_tip_length > 16.0) {
+        if (tip_length > 16.0) {
             translate([0, 24.0, 0])
-                aligned_channel(pen_tip_length - 16.0);
+                aligned_channel(tip_length - 16.0);
         }
     }
 }

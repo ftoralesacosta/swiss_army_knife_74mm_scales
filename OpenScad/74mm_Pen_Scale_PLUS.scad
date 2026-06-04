@@ -1,8 +1,8 @@
 // --- 1. File Configuration ---
 file_74mm = "../74mm_Pen_Scale_BASE.stl";
 $fn = 60; // Smoothness
-enable_pocket_clip = true; // Toggle the pocket clip screw holes
-enable_pins = true;        // Toggle the pin slots
+enable_pocket_clip = false;  // Toggle the pocket clip screw holes
+enable_pins    =     true;  // Toggle the pin slots
 
 // --- Centering & Debug ---
 left_edge = -5.7;
@@ -54,7 +54,8 @@ pin_angle = 91.0;
 difference() {
     // A. The Part (Imported & Moved as you requested)
     color("yellow", 1.0) 
-    translate([1, 9, 4.]) 
+    translate([2.71, 18.35, 4.95]) 
+    mirror([0, 0, 1])
     import(file_74mm);
 
     // B. The Holes to Cut

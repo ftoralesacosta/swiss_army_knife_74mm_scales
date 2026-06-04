@@ -11,6 +11,8 @@ This is a collection of OpenSCAD scripts for creating scales for 74mm Swiss Army
 ### 📜 Credits & Sources
 The base 58mm geometries are derived from **Emil’s SAK Scales** on Thingiverse:
 [Thing 5216489 - Victorinox 58mm Scales](https://www.thingiverse.com/thing:5216489/files)
+The 58mm Pen Slider STL file is from **DizzyDane's Slider Piece** on Thingivers:
+[Thing 6062753 - Victorinox 51mm Pen Slider](https://www.thingiverse.com/thing:6062753)
 
 ---
 

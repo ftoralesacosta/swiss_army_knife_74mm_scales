@@ -4,3 +4,4 @@
 *.txt
 *.py  # usually helper scripts
 *.md 
+*.bak
