@@ -9,7 +9,7 @@ $fn = 60;
 
 // --- PARAMETERS ---
 stl_file       = "sak58mmscales-pen.stl";
-pen_tip_length = 21.0; // Adjustable final length of the narrow channel (default 21.0)
+pen_tip_length = 23.0; // Adjustable final length of the narrow channel (default 21.0)
 
 // STL Orientation (aligned along Z, top flat face at Z=1.25, channel runs along Y)
 stl_rotation    = [-90, 0, 90];
