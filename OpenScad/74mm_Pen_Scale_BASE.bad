@@ -1,0 +1,131 @@
+// --- Simplified 74mm Pen Scale BASE ---
+// Keeps the original 58mm pen holder cavity perfectly untouched and applies it to the 74mm scale geometry.
+
+file_58mm = "sak58mmscales-pen.stl";
+$fn = 60; // Smoothness
+
+// --- 74mm Scale Geometry Config (from 74mm_Dual_Slot_Scale.scad) ---
+target_len       = 75;
+target_width     = 17.0;
+target_thick     = 3.5;
+mask_edge_radius = 2.1;
+
+// --- Rivet Holes Config ---
+hole_dist_y   = 60.5 / 2; 
+hole_dist_x   = 9.5 / 2; 
+hole_dia      = 3.8;
+hole_height   = 3.1; // Increased to match new thickness (3.5 - 0.4)
+hole_z_offset = -0.5; // Cuts from below flat face into scale
+
+// --- 58mm Pen Cavity Plug Config ---
+// The 58mm flat face is at Z = 1.25. Bounding box is Y in [-29.07, 28.99], X in [-7, 7].
+// The pen cavity exits at the +Y end (Y = 28.99).
+// We want it to exit at the -Y end of the 74mm scale (Y = -37.5).
+// After 180 deg Z rotation, the exit is at Y = -28.99.
+// Shifting by Y_shift = -8.51 places the exit at exactly Y = -37.5.
+Y_shift = -(target_len/2 - 28.99); // -8.51mm
+
+// --- 1. 74mm Outline & Solid Body ---
+module sak_profile_2d() {
+    rad = 7.5; elong = 0.9;
+    hull() {
+        for (x = [-1, 1], y = [-1, 1]) 
+            translate([x * (target_width/2 - rad), y * (target_len/2 - (rad * elong))])
+            scale([1, elong]) circle(r=rad);
+    }
+}
+
+module sak_scale_rounded(thickness=5, edge_radius=1.5) {
+    minkowski() {
+        linear_extrude(height = thickness - 2*edge_radius, center=true)
+            offset(r = -edge_radius)
+            sak_profile_2d();
+        sphere(r = edge_radius);
+    }
+}
+
+module sak_74mm_solid_body() {
+    difference() {
+        // Center double-thickness rounded scale at Z = 0
+        sak_scale_rounded(thickness = target_thick * 2, edge_radius = mask_edge_radius);
+        // Slice off bottom half to get a flat bottom face at Z = 0, body in Z > 0
+        translate([-100, -100, -200])
+            cube([200, 200, 200]);
+    }
+}
+
+// --- 2. 58mm STL and Cavity Extraction ---
+module oriented_58mm() {
+    union() {
+        rotate([-90, 0, 90]) import(file_58mm, convexity=3);
+        // Fill the original rivet holes so they are not part of the cavities
+        rivet_fills_58mm();
+    }
+}
+
+module rivet_fills_58mm() {
+    rivet_anchor = [-3.5, -23, -2.4];
+    rivet_spacing = [7.0, 46];
+    rivet_dim = [4.0, 3.65];
+    for (x = [0, 1], y = [0, 1]) {
+        translate([
+            rivet_anchor.x + (x * rivet_spacing.x), 
+            rivet_anchor.y + (y * rivet_spacing.y), 
+            rivet_anchor.z
+        ])
+        cylinder(d=rivet_dim[0], h=rivet_dim[1], $fn=30);
+    }
+}
+
+module pen_cavity_box() {
+    // A narrow box that covers ONLY the pen cavity (X from -1.5 to 1.5, Y from -22 to 35)
+    translate([0, 6.5, 0])
+        cube([3.0, 57, 10], center=true);
+}
+
+module pen_cavity_plug() {
+    // Extract only the pen cavity using the convex-hull method
+    intersection() {
+        difference() {
+            hull() oriented_58mm();
+            oriented_58mm();
+        }
+        pen_cavity_box();
+    }
+}
+
+// --- 3. 74mm Rivet Holes ---
+module new_rivet_holes() {
+    for(x = [-1, 1], y = [-1, 1]) {
+        translate([x * hole_dist_x, y * hole_dist_y, hole_z_offset]) 
+            cylinder(h=hole_height, d=hole_dia, $fn=30);
+    }
+}
+
+// --- 4. Final Assembly & Rendering ---
+difference() {
+    // A. The 74mm perfect solid body
+    sak_74mm_solid_body();
+
+    // B. The clean, untouched 58mm pen cavity plug
+    // Oriented and shifted to align flat face to Z=0, and exit cleanly at -Y end
+    translate([0, Y_shift, 0])
+        rotate([0, 0, 180])
+            translate([0, 0, 1.25])
+                mirror([0, 0, 1])
+                    pen_cavity_plug();
+
+    // C. Rivet holes for 74mm scale
+    #new_rivet_holes();
+}
+
+// --- 5. Preview Comparison (Optional) ---
+// Toggle show_comparison to true in your OpenSCAD editor to see the original
+// 58mm scale side-by-side with the new 74mm scale, with both flat faces coplanar at Z=0.
+show_comparison = true;
+
+if (show_comparison) {
+    translate([22, 0, 1.25])
+        mirror([0, 0, 1])
+            oriented_58mm();
+}
