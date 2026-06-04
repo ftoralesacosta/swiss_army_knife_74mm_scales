@@ -1,0 +1,6 @@
+.DS_Store
+*.png
+*.jpg
+*.txt
+*.py  # usually helper scripts
+*.md 

@@ -21,7 +21,7 @@ use_mathematical_geometry = true;
 use_live_pen_impression = false;
 
 // Set to true to preview the pen insert plug in red (ghost overlay in preview mode)
-preview_pen_insert = true;
+preview_pen_insert = false;
 
 // --- THICKNESS CONFIGURATION ---
 // Standard SAK 74mm scales are 2.5mm thick.
@@ -35,11 +35,14 @@ rivet_hole_depth = 1.6;
 
 // --- PEN CAVITY POSITIONING & FRICTION TUNING ---
 pen_offset_x = -2.0; // Left/right shift
-pen_offset_y = 7.0; // Up/down shift
+pen_offset_y = 10.0; // Up/down shift
 pen_offset_z = -0.30; 
 // Offset Z is important. More negative values make for a tighter fit. This may
 // need adjusting. Works for 0.4mm PETG and PLA. If the insert rattles in the scale
 // make pen_offset_z more negative. If it's too difficult to actuate the pen, make less negative
+
+// Total length of the narrow tip channel (matches the plug tip length)
+pen_tip_length = 23.0;
 
 // --- LIBRARY IMPORTS ---
 use <74mm_Dual_Slot_Scale.scad>
@@ -57,10 +60,16 @@ module blank_scale_base() {
 
 module pen_insert_plug() {
     if (use_live_pen_impression) {
-        pen_cavity_impression();
+        pen_cavity_impression(tip_length = pen_tip_length);
     } else {
         import("pen_insert_positive.stl");
     }
+}
+
+module deepen_tip_channel(length) {
+    // Deepens the tip channel from Y = 8.0 to Y = 8.0 + length by 0.75 mm in Z
+    translate([0, 8.0, -0.75])
+        aligned_channel(length);
 }
 
 // Solid cylinders that match the position and height of pre-existing rivet holes 
@@ -127,7 +136,10 @@ if (preview_pen_insert) {
     translate([pen_offset_x, pen_offset_y, pen_offset_z])
     translate([0, 0, 1.25])
     mirror([0, 0, 1])
-    pen_insert_plug();
+    union() {
+        pen_insert_plug();
+        deepen_tip_channel(pen_tip_length);
+    }
 }
 
 difference() {
@@ -144,5 +156,8 @@ difference() {
     translate([pen_offset_x, pen_offset_y, pen_offset_z])
     translate([0, 0, 1.25])
     mirror([0, 0, 1])
-    pen_insert_plug();
+    union() {
+        pen_insert_plug();
+        deepen_tip_channel(pen_tip_length);
+    }
 }
