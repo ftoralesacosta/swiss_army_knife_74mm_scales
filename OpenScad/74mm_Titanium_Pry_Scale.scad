@@ -21,10 +21,14 @@ target_thickness = 2.5;
 
 // --- TAPERED TIP CONFIGURATION ---
 slice_at_y = -31.0;     // Y-coordinate to cut the scale and start the taper
-y_target   = slice_at_y - 7;     // Y-coordinate of the chisel tip (length of tool)
+y_target   = slice_at_y - 8;     // Y-coordinate of the chisel tip (length of tool)
 z_target   = 0;       // Z-coordinate of the chisel tip (height of bevel)
 tip_width  = 6.0;       // Width of the chisel tip in X
-y_tip_cut  = y_target + 1.5; // Y-coordinate to cut off the tip (set to less than y_target to disable)
+y_tip_cut  = y_target + 1.2; // Y-coordinate to cut off the tip (set to less than y_target to disable)
+
+enable_curved_taper = false; // Set to true for a smooth parabolic transition, false for a sharp linear taper
+taper_slices = 12;      // Number of slices for the curved taper (higher = smoother, 10-15 is plenty)
+scale_width_at_slice = 13.5; // Estimated width of the scale at slice_at_y (used for smooth X-taper)
 
 // --- MODULES ---
 
@@ -37,15 +41,63 @@ module cross_section_slice(y, thickness=0.05) {
     }
 }
 
-module tapered_extension(y, y_target, z_target, tip_width) {
-    // Linearly tapers the cross section slice at Y = y to a target line segment
-    hull() {
-        cross_section_slice(y);
+module tapered_extension(y, y_target, z_target, tip_width, N=taper_slices) {
+    if (enable_curved_taper) {
+        // Generates a mathematically smooth quadratic (parabolic) taper
+        // from the scale cross-section at Y = y to the target chisel edge.
+        // By using a quadratic curve (t^2), the tangent at the start of the taper
+        // is perfectly flat (slope = 0), matching the scale body with no sharp crease.
+        y_start = y;
+        y_end = y_target;
+        z_start = target_thickness;
+        z_end = z_target;
+        width_start = scale_width_at_slice;
+        width_end = tip_width;
         
-        // Target line segment along the X-axis
+        for (i = [0 : N-1]) {
+            t0 = i / N;
+            t1 = (i + 1) / N;
+            
+            // Quadratic curve: flat at start (t=0), accelerating to a wedge at end (t=1)
+            curve0 = t0 * t0;
+            curve1 = t1 * t1;
+            
+            // Y positions for the segment
+            y0 = y_start - t0 * (y_start - y_end);
+            y1 = y_start - t1 * (y_start - y_end);
+            
+            // Z scaling (max 0.001 to prevent degenerate 2D faces in CGAL)
+            sz0 = max(0.001, 1.0 - curve0 * (1.0 - z_end/z_start));
+            sz1 = max(0.001, 1.0 - curve1 * (1.0 - z_end/z_start));
+            
+            // X scaling (max 0.001 to prevent degenerate 2D faces in CGAL)
+            sx0 = max(0.001, 1.0 - curve0 * (1.0 - width_end/width_start));
+            sx1 = max(0.001, 1.0 - curve1 * (1.0 - width_end/width_start));
+            
+            hull() {
+                // Start of segment: scale the base slice at Y=0, then place at y0
+                translate([0, y0, 0])
+                    scale([sx0, 1.0, sz0])
+                    translate([0, -y_start, 0])
+                    cross_section_slice(y_start);
+                    
+                // End of segment: scale the base slice at Y=0, then place at y1
+                translate([0, y1, 0])
+                    scale([sx1, 1.0, sz1])
+                    translate([0, -y_start, 0])
+                    cross_section_slice(y_start);
+            }
+        }
+    } else {
+        // Linearly tapers the cross section slice at Y = y to a target line segment
         hull() {
-            translate([-tip_width/2, y_target, z_target]) sphere(r=0.001, $fn=8);
-            translate([ tip_width/2, y_target, z_target]) sphere(r=0.001, $fn=8);
+            cross_section_slice(y);
+            
+            // Target line segment along the X-axis
+            hull() {
+                translate([-tip_width/2, y_target, z_target]) sphere(r=0.001, $fn=8);
+                translate([ tip_width/2, y_target, z_target]) sphere(r=0.001, $fn=8);
+            }
         }
     }
 }
@@ -80,4 +132,5 @@ difference() {
 
     // B. Drill clean rivet holes to the exact depth
     #new_rivet_holes();
+
 }
