@@ -108,9 +108,9 @@ module base_scale_solid() {
             linear_extrude(height = extra_thickness)
                 sak_profile_2d();
                 
-            // Original rounded scale shifted up
+            // Original rounded scale shifted up (2.5 mm, so total = target_thickness)
             translate([0, 0, extra_thickness])
-                sak_74mm_solid_body();
+                sak_74mm_solid_body(thick = target_thickness - extra_thickness);
         }
     } else {
         union() {
